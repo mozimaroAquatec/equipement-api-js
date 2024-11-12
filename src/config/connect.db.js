@@ -27,7 +27,7 @@ const connectDB = async () => {
         logging_1.DBLogger.info("Data base connected successfully");
     }
     catch (error) {
-        logging_1.DBLogger.error(error, `mongoose connect error is : ${error}`);
+        logging_1.DBLogger.error({ error }, `mongoose connect error is : ${error}`);
         throw new error_handler_1.default(`mongoose connect error is : ${error}`);
     }
 };
