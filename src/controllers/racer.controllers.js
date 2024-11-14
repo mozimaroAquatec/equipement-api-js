@@ -83,19 +83,19 @@ exports.getRacers = getRacers;
 const getRacerInfo = async (_, res) => {
     try {
         // Get the count of Racer connections for today
-        const countOfConnectOfEquipments = await racerServices.getCountOfConnectOfRacers();
+        const countOfConnectOfEquipements = await racerServices.getCountOfConnectOfRacers();
         // Get the count of Racer disconnections from yesterday
-        const countOfDisconnectOfEquipments = await racerServices.getCountOfDisconnectOfRacers();
-        const countOfNewConnectOfEquipments = await racerServices.getCountOfNewConnectOfRacers();
-        const countOfNewOfDisconnectOfEquipments = await racerServices.getCountOfNewDisconnectOfRacer();
-        const countToalOfEquipments = await racerServices.getCountOfTotalOfRacer();
+        const countOfDisconnectOfEquipements = await racerServices.getCountOfDisconnectOfRacers();
+        const countOfNewConnectOfEquipements = await racerServices.getCountOfNewConnectOfRacers();
+        const countOfNewOfDisconnectOfEquipements = await racerServices.getCountOfNewDisconnectOfRacer();
+        const countToalOfEquipements = await racerServices.getCountOfTotalOfRacer();
         // Send a success response with the Racer information
         return res.status(200).json(new success_response_1.default("get racers info success", {
-            countOfConnectOfEquipments,
-            countOfNewOfDisconnectOfEquipments,
-            countOfNewConnectOfEquipments,
-            countOfDisconnectOfEquipments,
-            countToalOfEquipments,
+            countOfConnectOfEquipements,
+            countOfNewOfDisconnectOfEquipements,
+            countOfNewConnectOfEquipements,
+            countOfDisconnectOfEquipements,
+            countToalOfEquipements,
         }));
     }
     catch (error) {

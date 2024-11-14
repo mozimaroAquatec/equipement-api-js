@@ -85,22 +85,22 @@ exports.getLivepools = getLivepools;
 const getLivepoolInfo = async (req, res) => {
     try {
         // Get the count of Livepool connections for today
-        const countOfConnectOfEquipments = await livepoolServices.getCountOfConnectOfLivepools();
+        const countOfConnectOfEquipements = await livepoolServices.getCountOfConnectOfLivepools();
         // Get the count of new Livepool disconnections from yesterday
-        const countOfNewOfDisconnectOfEquipments = await livepoolServices.getCountOfNewOfDisconnectOfLivepools();
+        const countOfNewOfDisconnectOfEquipements = await livepoolServices.getCountOfNewOfDisconnectOfLivepools();
         // Get the count of new Livepool connections
-        const countOfNewConnectOfEquipments = await livepoolServices.getCountOfNewConnectOfLivepools();
+        const countOfNewConnectOfEquipements = await livepoolServices.getCountOfNewConnectOfLivepools();
         // Get the total count of disconnected Livepool devices
-        const countOfDisconnectOfEquipments = await livepoolServices.getCountOfDisconnectOfLivepools();
+        const countOfDisconnectOfEquipements = await livepoolServices.getCountOfDisconnectOfLivepools();
         // Get the total count of Livepool devices
-        const countToalOfEquipments = await livepoolServices.getCountOfTotalOfLivepool();
+        const countToalOfEquipements = await livepoolServices.getCountOfTotalOfLivepool();
         // Send a success response with the Livepool information
         return res.status(200).json(new success_response_1.default("Retrieved livepools information successfully", {
-            countOfConnectOfEquipments,
-            countOfNewOfDisconnectOfEquipments,
-            countOfNewConnectOfEquipments,
-            countOfDisconnectOfEquipments,
-            countToalOfEquipments,
+            countOfConnectOfEquipements,
+            countOfNewOfDisconnectOfEquipements,
+            countOfNewConnectOfEquipements,
+            countOfDisconnectOfEquipements,
+            countToalOfEquipements,
         }));
     }
     catch (error) {
