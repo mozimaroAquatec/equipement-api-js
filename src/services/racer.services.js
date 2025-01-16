@@ -26,14 +26,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.existRacerByMacAddress = exports.getAllRacers = exports.removeDuplicatesOfRacer = exports.getCountOfTotalOfRacer = exports.getDuplicatesRacer = exports.getModeLampInfoOfRacer = exports.getModePumpsInfoOfRacer = exports.getCountOfNewDisconnectOfRacer = exports.getCountOfNewConnectOfRacers = exports.getCountOfDisconnectOfRacers = exports.getCountOfConnectOfRacers = exports.getRacerConnect = exports.getRacers = void 0;
+exports.updateRacerInfo = exports.existRacerByMacAddress = exports.getAllRacers = exports.removeDuplicatesOfRacer = exports.getCountOfTotalOfRacer = exports.getDuplicatesRacer = exports.getModeLampInfoOfRacer = exports.getModePumpsInfoOfRacer = exports.getCountOfNewDisconnectOfRacer = exports.getCountOfNewConnectOfRacers = exports.getCountOfDisconnectOfRacers = exports.getCountOfConnectOfRacers = exports.getRacerConnect = exports.getRacers = void 0;
 const date_1 = __importDefault(require("../utils/date"));
 const error_handler_1 = __importDefault(require("../utils/error.handler"));
 const logger = __importStar(require("../logging/index"));
-const RacerInterfaces = __importStar(require("../interfaces/racer.interface"));
 const racer_model_1 = __importDefault(require("../models/racers/racer.model"));
-const CommonInterfaces = __importStar(require("../interfaces/common.interface"));
+const EquipementInterfaces = __importStar(require("../interfaces/equipement.interfaces"));
+const equipementServices = __importStar(require("../services/equipement.services"));
 const racerHelpers = __importStar(require("../helpers/racer.helpers"));
+const racerHistory_model_1 = __importDefault(require("../models/racers/racerHistory.model"));
+const racerLocation_model_1 = __importDefault(require("../models/racers/racerLocation.model"));
 /**
  * %Service function to get racers that match the provided MAC address and date.
  *
@@ -45,7 +47,7 @@ const getRacers = async (searchMacAddress, status, pumpMode) => {
     try {
         const dateFn = (0, date_1.default)();
         let racers = [];
-        if (status === CommonInterfaces.EquipmentStatus.AllConnect) {
+        if (status === EquipementInterfaces.EquipementStatusParams.AllConnect) {
             racers = (await racer_model_1.default.find({
                 $and: [
                     { macAddress: { $regex: searchMacAddress } },
@@ -58,14 +60,14 @@ const getRacers = async (searchMacAddress, status, pumpMode) => {
                 .populate("location"));
             racers = racerHelpers.filterRacerByPumpModes(racers, pumpMode);
         }
-        else if (status === CommonInterfaces.EquipmentStatus.NewConnect) {
+        else if (status === EquipementInterfaces.EquipementStatusParams.NewConnect) {
             racers = (await racer_model_1.default.find({
                 $and: [
                     { macAddress: { $regex: searchMacAddress } },
                     {
                         $or: [
-                            { status: RacerInterfaces.Status.FirstConnect },
-                            { status: RacerInterfaces.Status.Reconnect },
+                            { status: EquipementInterfaces.EquipementStatus.FirstConnect },
+                            { status: EquipementInterfaces.EquipementStatus.Reconnect },
                         ],
                     },
                     { date: dateFn.today },
@@ -77,7 +79,7 @@ const getRacers = async (searchMacAddress, status, pumpMode) => {
                 .populate("location"));
             racers = racerHelpers.filterRacerByPumpModes(racers, pumpMode);
         }
-        else if (status === CommonInterfaces.EquipmentStatus.AllDisconnect) {
+        else if (status === EquipementInterfaces.EquipementStatusParams.AllDisconnect) {
             racers = (await racer_model_1.default.find({
                 $and: [
                     { macAddress: { $regex: searchMacAddress } },
@@ -89,7 +91,7 @@ const getRacers = async (searchMacAddress, status, pumpMode) => {
                 .populate("history")
                 .populate("location"));
         }
-        else if (status === CommonInterfaces.EquipmentStatus.NewDisconnect) {
+        else if (status === EquipementInterfaces.EquipementStatusParams.NewDisconnect) {
             racers = (await racer_model_1.default.find({
                 $and: [
                     { macAddress: { $regex: searchMacAddress } },
@@ -112,7 +114,7 @@ const getRacers = async (searchMacAddress, status, pumpMode) => {
     }
     catch (error) {
         // Log the error if something goes wrong
-        logger.racerLogger.error(error, "get all racers services error");
+        logger.racerLogger.error({ error }, "get all racers services error");
         // Throw an error response with the error details
         throw new error_handler_1.default(`get all racers services error : ${error}`);
     }
@@ -134,7 +136,7 @@ const getRacerConnect = async () => {
     }
     catch (error) {
         // Log the error for troubleshooting
-        logger.racerLogger.error(error, "getRacerConnect");
+        logger.racerLogger.error({ error }, "getRacerConnect");
         // Throw a custom error response
         throw new error_handler_1.default(`getRacerConnect error: ${error}`);
     }
@@ -157,7 +159,7 @@ const getCountOfConnectOfRacers = async () => {
     }
     catch (error) {
         // Log the error
-        logger.racerLogger.error(error, "getracersInfo");
+        logger.racerLogger.error({ error }, "getracersInfo");
         // Throw a custom error response
         throw new error_handler_1.default(`getracersInfo ${error}`);
     }
@@ -179,7 +181,7 @@ const getCountOfDisconnectOfRacers = async () => {
     }
     catch (error) {
         // Log the error
-        logger.racerLogger.error(error, "getCountOfDisconnectOfRacers services");
+        logger.racerLogger.error({ error }, "getCountOfDisconnectOfRacers services");
         // Throw a custom error response
         throw new error_handler_1.default(`getCountOfDisconnectOfRacers services ${error}`);
     }
@@ -206,7 +208,7 @@ const getCountOfNewConnectOfRacers = async () => {
     }
     catch (error) {
         // Log the error
-        logger.racerLogger.error(error, "getCountOfNewConnectOfRacers service");
+        logger.racerLogger.error({ error }, "getCountOfNewConnectOfRacers service");
         // Throw a custom error response
         throw new error_handler_1.default(`getCountOfNewConnectOfRacers service ${error}`);
     }
@@ -231,7 +233,7 @@ const getCountOfNewDisconnectOfRacer = async () => {
     }
     catch (error) {
         // Log the error
-        logger.racerLogger.error(error, "getCountOfNewDisconnectOfRacer service");
+        logger.racerLogger.error({ error }, "getCountOfNewDisconnectOfRacer service");
         // Throw a custom error response
         throw new error_handler_1.default(`getCountOfNewDisconnectOfRacer service ${error}`);
     }
@@ -257,7 +259,7 @@ const getModePumpsInfoOfRacer = async (mode) => {
     }
     catch (error) {
         // Log the error for troubleshooting
-        logger.racerLogger.error(error, "getModePumpsInfoOfRacer");
+        logger.racerLogger.error({ error }, "getModePumpsInfoOfRacer");
         // Throw a custom error response
         throw new error_handler_1.default(`getModePumpsInfoOfRacer error: ${error}`);
     }
@@ -283,7 +285,7 @@ const getModeLampInfoOfRacer = async (mode) => {
     }
     catch (error) {
         // Log the error for troubleshooting
-        logger.racerLogger.error(error, "getModeLampInfoOfRacer");
+        logger.racerLogger.error({ error }, "getModeLampInfoOfRacer");
         // Throw a custom error response
         throw new error_handler_1.default(`getModeLampInfoOfRacer error: ${error}`);
     }
@@ -315,7 +317,7 @@ const getDuplicatesRacer = async () => {
     }
     catch (error) {
         // Log the error if something goes wrong
-        logger.racerLogger.error(error, "get repeat racers services error");
+        logger.racerLogger.error({ error }, "get repeat racers services error");
         // Throw an error response with the error details
         throw new error_handler_1.default(`get repeat racers services error : ${error}`);
     }
@@ -334,7 +336,7 @@ const getCountOfTotalOfRacer = async () => {
     }
     catch (error) {
         // Log the error for debugging purposes
-        logger.racerLogger.error(error, "Error in getCountOfTotalsOfRacer service");
+        logger.racerLogger.error({ error }, "Error in getCountOfTotalsOfRacer service");
         // Throw a custom error response with details about the error
         throw new error_handler_1.default(`getCountOfTotalsOfRacer service: ${error}`);
     }
@@ -385,7 +387,7 @@ const removeDuplicatesOfRacer = async () => {
     }
     catch (error) {
         // Log the error if something goes wrong
-        logger.racerLogger.error(error, "Error in removeDuplicatesOfRacer service");
+        logger.racerLogger.error({ error }, "Error in removeDuplicatesOfRacer service");
         // Throw an error response with the error details
         throw new error_handler_1.default(`removeDuplicatesOfRacer service error: ${error}`);
     }
@@ -404,7 +406,7 @@ const getAllRacers = async () => {
     }
     catch (error) {
         // Log the error with the function name for better traceability
-        logger.racerLogger.error(error, "getAllRacers");
+        logger.racerLogger.error({ error }, "getAllRacers");
         // Throw a custom error response with details of the error
         throw new error_handler_1.default(`getAllRacers error: ${error}`);
     }
@@ -424,10 +426,174 @@ const existRacerByMacAddress = async (macAddress) => {
     }
     catch (error) {
         // Log the error with the function name for better traceability
-        logger.racerLogger.error(error, "existRacerByMacAddress");
+        logger.racerLogger.error({ error }, "existRacerByMacAddress");
         // Throw a custom error response with details of the error
         throw new error_handler_1.default(`existRacerByMacAddress error: ${error}`);
     }
 };
 exports.existRacerByMacAddress = existRacerByMacAddress;
+// export const updateRacerInfo = async () => {
+//   try {
+//     console.log("start");
+//     const racers = await getAllRacers();
+//     const equipementInfoList =
+//       await equipementServices.getEquipementsInfoFirstConnection();
+//     for (let i = 0; i < racers.length; i++) {
+//       for (let j = 0; j < equipementInfoList.length; j++) {
+//         const existRacer = await existRacerInEquipementList(
+//           racers[i].macAddress
+//         );
+//         console.log("existRacer", existRacer);
+//         if (existRacer) {
+//           console.log("true existRacer");
+//           const racerInfo =
+//             await equipementServices.getEquipementInfoByMacAddress(
+//               racers[i].macAddress
+//             );
+//           if (
+//             racers[i].macAddress.toUpperCase() ===
+//             equipementInfoList[j].mac.toLocaleUpperCase()
+//           ) {
+//             console.log("update racer");
+//             Racer.findByIdAndUpdate(racers[i]._id, {
+//               firstConnection: equipementInfoList[j].firstConnection,
+//               lastUpdatedTime: racerInfo?.lastUpdatedTime,
+//               system: racerInfo?.system,
+//             });
+//             RacerHistory.updateOne(
+//               { racerMacaddress: racers[i].macAddress },
+//               {
+//                 firstConnection: equipementInfoList[j].firstConnection,
+//                 lastUpdatedTime: racerInfo?.lastUpdatedTime,
+//               }
+//             );
+//             RacerLocation.updateOne(
+//               { racerMacaddress: racers[i].macAddress },
+//               {
+//                 country: racerInfo?.country,
+//                 city: racerInfo?.city,
+//                 latitude: racerInfo?.lat,
+//                 longitude: racerInfo?.lng,
+//               }
+//             );
+//           }
+//         } else {
+//           console.log("false exist racer");
+//           Racer.findByIdAndUpdate(racers[i]._id, {
+//             firstConnection: "Not found",
+//             lastUpdatedTime: "Not found",
+//             system: "Not found",
+//           });
+//           RacerHistory.updateOne(
+//             { racerMacaddress: racers[i].macAddress },
+//             {
+//               firstConnection: "Not found",
+//               lastUpdatedTime: "Not found",
+//             }
+//           );
+//           RacerLocation.updateOne(
+//             { racerMacaddress: racers[i].macAddress },
+//             {
+//               country: "Not found",
+//               city: "Not found",
+//               latitude: "Not found",
+//               longitude: "Not found",
+//             }
+//           );
+//         }
+//       }
+//     }
+//   } catch (error) {
+//     throw new ErrorResponse(`updateRacerInfo ${error}`);
+//   }
+// };
+const updateRacerInfo = async () => {
+    try {
+        console.log("Start updating racer info...");
+        const racers = await (0, exports.getAllRacers)();
+        const equipementInfoList = await equipementServices.getEquipementsInfoFirstConnection();
+        // Create a map of equipementInfoList for fast lookup
+        const equipementMap = new Map();
+        equipementInfoList.forEach((item) => {
+            equipementMap.set(item.mac.toUpperCase(), item);
+        });
+        for (const racer of racers) {
+            const racerMac = racer.macAddress.toUpperCase();
+            const equipementInfo = equipementMap.get(racerMac);
+            if (equipementInfo) {
+                console.log(`Racer found: ${racerMac}`);
+                const racerInfo = await equipementServices.getEquipementInfoByMacAddress(racer.macAddress);
+                if (racerInfo) {
+                    // Update racer info
+                    await racer_model_1.default.findByIdAndUpdate(racer._id, {
+                        firstConnection: equipementInfo.firstConnection,
+                        lastUpdatedTime: racerInfo?.lastUpdatedTime,
+                        system: racerInfo?.system,
+                    });
+                    await racerHistory_model_1.default.updateOne({ racerMacaddress: racer.macAddress }, {
+                        firstConnection: equipementInfo.firstConnection,
+                        lastUpdatedTime: racerInfo?.lastUpdatedTime,
+                        system: racerInfo.system,
+                    }, { upsert: true });
+                    await racerLocation_model_1.default.updateOne({ racerMacaddress: racer.macAddress }, {
+                        country: racerInfo?.country,
+                        city: racerInfo?.city,
+                        latitude: racerInfo?.lat,
+                        longitude: racerInfo?.lng,
+                    }, { upsert: true });
+                }
+                else {
+                    console.log(`Racer not found: ${racerMac}`);
+                    // Update racer info as "Not found"
+                    await racer_model_1.default.findByIdAndUpdate(racer._id, {
+                        firstConnection: "Not found",
+                        lastUpdatedTime: "Not found",
+                        system: "Not found",
+                    });
+                    await racerHistory_model_1.default.updateOne({ racerMacaddress: racer.macAddress }, {
+                        firstConnection: "Not found",
+                        lastUpdatedTime: "Not found",
+                    }, { upsert: true });
+                    await racerLocation_model_1.default.updateOne({ racerMacaddress: racer.macAddress }, {
+                        country: "Not found",
+                        city: "Not found",
+                        latitude: "Not found",
+                        longitude: "Not found",
+                    }, { upsert: true });
+                }
+            }
+            else {
+                console.log(`Racer not found: ${racerMac}`);
+                // Update racer info as "Not found"
+                await racer_model_1.default.findByIdAndUpdate(racer._id, {
+                    firstConnection: "Not found",
+                    lastUpdatedTime: "Not found",
+                    system: "Not found",
+                });
+                await racerHistory_model_1.default.updateOne({ racerMacaddress: racer.macAddress }, {
+                    firstConnection: "Not found",
+                    lastUpdatedTime: "Not found",
+                }, { upsert: true });
+                await racerLocation_model_1.default.updateOne({ racerMacaddress: racer.macAddress }, {
+                    country: "Not found",
+                    city: "Not found",
+                    latitude: "Not found",
+                    longitude: "Not found",
+                }, { upsert: true });
+            }
+        }
+        console.log("Finished updating racer info.");
+    }
+    catch (error) {
+        throw new error_handler_1.default(`updateRacerInfo Error: ${error}`);
+    }
+};
+exports.updateRacerInfo = updateRacerInfo;
+const existRacerInEquipementList = async (macAddress) => {
+    try {
+        const equipementList = await equipementServices.getEquipementsInfoFirstConnection();
+        return equipementList.find((item) => item.mac === macAddress);
+    }
+    catch (error) { }
+};
 //# sourceMappingURL=racer.services.js.map

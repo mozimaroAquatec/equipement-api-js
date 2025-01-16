@@ -11,13 +11,10 @@ const RacerLocationSchema = new mongoose_1.default.Schema({
         required: true,
         ref: "Racer", // Reference to the Racer model
     },
-    message: { type: String, required: true, default: "false" },
-    updateMessage: { type: Boolean, required: true, default: false },
+    // message: { type: String, required: true, default: "false" },
+    // updateMessage: { type: Boolean, required: true, default: false },
     country: { type: String, required: true, default: "false" },
     city: { type: String, required: true, default: "false" },
-    town: { type: String, required: true, default: "false" },
-    village: { type: String, required: true, default: "false" },
-    hamlet: { type: String, required: true, default: "false" },
     latitude: { type: String, required: true },
     longitude: { type: String, required: true },
 }, {

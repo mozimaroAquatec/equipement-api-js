@@ -26,12 +26,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeDuplicatesOfRacer = exports.getInfoOfLampsOfRacer = exports.getInfoOfPumpsOfRacer = exports.getDuplicatesRacer = exports.getRacerInfo = exports.getRacers = void 0;
+exports.updateRacer = exports.removeDuplicatesOfRacer = exports.getInfoOfLampsOfRacer = exports.getInfoOfPumpsOfRacer = exports.getDuplicatesRacer = exports.getRacerInfo = exports.getRacers = void 0;
 const error_handler_1 = __importDefault(require("../utils/error.handler"));
 const racerServices = __importStar(require("../services//racer.services"));
 const success_response_1 = __importDefault(require("../utils/success.response"));
 const logger = __importStar(require("../logging/index"));
-const CommonInterfaces = __importStar(require("../interfaces/common.interface"));
+const EquipementInterfaces = __importStar(require("../interfaces/equipement.interfaces"));
 const pumpServices = __importStar(require("../services/pump.services"));
 const lampServices = __importStar(require("../services/lamp.services"));
 const PumpInterfaces = __importStar(require("../interfaces/pump.interface"));
@@ -48,7 +48,8 @@ const LampInterfaces = __importStar(require("../interfaces/lamp.interface"));
 const getRacers = async (req, res) => {
     try {
         const searchMacAddress = req.query.searchMacAddress?.replace(/\s/g, "") || "";
-        const status = req.query.status || CommonInterfaces.EquipmentStatus.AllConnect;
+        const status = req.query.status ||
+            EquipementInterfaces.EquipementStatusParams.AllConnect;
         const pumpMode = req.query.pumpMode || PumpInterfaces.Mode.False;
         // Fetch the list of racers using the service function
         const racers = await racerServices.getRacers(searchMacAddress, status, pumpMode);
@@ -223,4 +224,17 @@ const removeDuplicatesOfRacer = async (req, res) => {
     }
 };
 exports.removeDuplicatesOfRacer = removeDuplicatesOfRacer;
+const updateRacer = async (req, res) => {
+    try {
+        await racerServices.updateRacerInfo();
+        res.status(200).json(new success_response_1.default("update racer success"));
+    }
+    catch (error) {
+        logger.racerLogger.error({ error }, // Log the error and request data for better context
+        "updateRacer controller Error");
+        // Return a 500 Internal Server Error response
+        return res.status(500).json(new error_handler_1.default("Internal server error"));
+    }
+};
+exports.updateRacer = updateRacer;
 //# sourceMappingURL=racer.controllers.js.map

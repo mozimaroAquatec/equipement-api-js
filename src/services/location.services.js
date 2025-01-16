@@ -67,14 +67,14 @@ const createEquipementLocation = async (equipementModel, locationModel, // Make 
 macAddressField) => {
     try {
         // Fetch all equipment from the equipment model
-        const equipements = await equipementServices.getAllEquipements(equipementModel);
+        const equipements = await equipementServices.getEquipements(equipementModel);
         // Iterate over each equipment
         for (let equipement of equipements) {
             // Generate random coordinates around a specific center
             const lat = equipementHelpers.getRandomCoordinatesAroundCenter(46.2276, 2.2137, 200).latitude;
             const log = equipementHelpers.getRandomCoordinatesAroundCenter(46.2276, 2.2137, 200).longitude;
             // Get the country and city based on the generated coordinates
-            const location = await (0, geoLocation_services_1.getCountryAndCityByLatAndLon)(lat, log);
+            const location = await (0, geoLocation_services_1.getCountryAndCityByLatiAndLon)(lat, log);
             // Update or insert the equipment's location information
             await locationModel.updateOne({ [macAddressField]: equipement.macAddress }, {
                 [macAddressField]: equipement.macAddress,
@@ -108,7 +108,7 @@ exports.createEquipementLocation = createEquipementLocation;
 const updateLocationByMacAddress = async (equipementLocationModel, macAddressField, macAddress, latitude, longitude) => {
     try {
         // Fetch the country and city based on latitude and longitude
-        const location = await (0, geoLocation_services_1.getCountryAndCityByLatAndLon)(parseFloat(latitude), parseFloat(longitude));
+        const location = await (0, geoLocation_services_1.getCountryAndCityByLatiAndLon)(parseFloat(latitude), parseFloat(longitude));
         // Update the equipment location in the database, using the MAC address to find the specific entry
         await equipementLocationModel.updateOne({ [macAddressField]: macAddress }, {
             latitude,

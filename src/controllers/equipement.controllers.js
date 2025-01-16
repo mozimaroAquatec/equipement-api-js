@@ -26,14 +26,53 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getEquipementLocation = exports.createEquipementsLocation = exports.getEquipementHistory = void 0;
+exports.getLocationByLalAndLong = exports.getEquipementInfoByMacAddress = exports.getEquipementsInfo = exports.getEquipementLocation = exports.createEquipementsLocation = exports.getEquipementHistory = exports.getEquipementByMacAddress = exports.EquipementsName = void 0;
 const success_response_1 = __importDefault(require("../utils/success.response"));
 const equipementSchemas = __importStar(require("../utils/schemas/equipement.schemas"));
 const error_handler_1 = __importDefault(require("../utils/error.handler"));
 const logger = __importStar(require("../logging/index"));
 const EquipementInterfaces = __importStar(require("../interfaces/equipement.interfaces"));
+const equipementServices = __importStar(require("../services/equipement.services"));
 const locationServices = __importStar(require("../services/location.services"));
 const historyServices = __importStar(require("../services/history.services"));
+const geoLocationServices = __importStar(require("../services/geoLocation.services"));
+const racer_model_1 = __importDefault(require("../models/racers/racer.model"));
+const livepool_model_1 = __importDefault(require("../models/livepools/livepool.model"));
+exports.EquipementsName = {
+    Livepool: livepool_model_1.default,
+    Racer: racer_model_1.default,
+};
+const getEquipementByMacAddress = async (req, res) => {
+    try {
+        // Validate the request query parameters using a schema
+        const { error } = equipementSchemas.getEquipement(req.query);
+        // If validation fails, return a 400 error with the validation message
+        if (error) {
+            return res.status(400).json(new error_handler_1.default(error.details[0].message));
+        }
+        const { equipementModel, macAddress } = req.query;
+        const modelOfEquipement = exports.EquipementsName[equipementModel];
+        // If the model is not found, return a 404 error
+        if (!modelOfEquipement) {
+            return res
+                .status(404)
+                .json(new error_handler_1.default("getEquipementByMacAddress model not found"));
+        }
+        // Fetch the equipment history using the mapped model
+        const equipement = await equipementServices.getEquipementByMacAddress(modelOfEquipement, macAddress);
+        // Return the success response with the fetched history
+        return res.status(200).json(new success_response_1.default(`get equipement ${modelOfEquipement.modelName} success`, {
+            equipement,
+        }));
+    }
+    catch (error) {
+        // Log the error for debugging purposes
+        logger.equipementLogger.error({ error }, "getEquipementByMacAddress controller error");
+        // Return a 500 internal server error if something goes wrong
+        return res.status(500).json(new error_handler_1.default("Internal server error"));
+    }
+};
+exports.getEquipementByMacAddress = getEquipementByMacAddress;
 /**
  *% Controller to handle the request for fetching equipment history.
  ** Validates the query parameters and fetches the history from the appropriate model.
@@ -93,9 +132,6 @@ const createEquipementsLocation = async (req, res) => {
         }
         // Destructure the required data from the validated request body
         const { equipementLocationModel, macAddressField, equipementModel } = req.body;
-        // Log the input data for debugging purposes
-        console.log(macAddressField);
-        console.log(equipementLocationModel);
         // Find the model corresponding to the specified equipment location
         const modelLocation = EquipementInterfaces.EquipementLocationName[equipementLocationModel];
         // If the location model is not found, return a 404 error
@@ -174,4 +210,71 @@ const getEquipementLocation = async (req, res) => {
     }
 };
 exports.getEquipementLocation = getEquipementLocation;
+const getEquipementsInfo = async (req, res) => {
+    try {
+        const equipementsInfo = await equipementServices.getEquipementsInfoFirstConnection();
+        // console.log("equipementsInfo", equipementsInfo);
+        return res
+            .status(200)
+            .json(new success_response_1.default("getEquipementsInfo success", { equipementsInfo }));
+    }
+    catch (error) {
+        // Log the error for debugging purposes
+        logger.equipementLogger.error({ error }, "getEquipementsInfo");
+        // Return a 500 internal server error response if something goes wrong
+        return res.status(500).json(new error_handler_1.default("Internal server error"));
+    }
+};
+exports.getEquipementsInfo = getEquipementsInfo;
+// A0:A3:B3:7B:17:59
+// C8:2E:18:80:1B:3D
+const getEquipementInfoByMacAddress = async (req, res) => {
+    try {
+        const equipementInfo = await equipementServices.getEquipementInfoByMacAddress("C8:2E:18:80:1B:3D");
+        if (equipementInfo) {
+            return res.status(200).json(new success_response_1.default("getEquipementInfoByMacAddress success", {
+                equipementInfo,
+            }));
+        }
+        else {
+            return res.status(200).json(new error_handler_1.default("data not found"));
+        }
+    }
+    catch (error) {
+        // Log the error for debugging purposes
+        logger.equipementLogger.error({ error }, "getEquipementsInfo");
+        // Return a 500 internal server error response if something goes wrong
+        return res.status(500).json(new error_handler_1.default("Internal server error"));
+    }
+};
+exports.getEquipementInfoByMacAddress = getEquipementInfoByMacAddress;
+const getLocationByLalAndLong = async (req, res) => {
+    try {
+        const { lat, long } = req.query;
+        const location = await geoLocationServices.getCountryAndCityByLatiAndLon(parseFloat(lat), parseFloat(long));
+        return res
+            .status(200)
+            .json(new success_response_1.default("get location success", { location }));
+    }
+    catch (error) {
+        // Log the error for debugging purposes
+        logger.equipementLogger.error({ error }, "getLocationByLalAndLong error");
+        // Return a 500 internal server error response if something goes wrong
+        return res.status(500).json(new error_handler_1.default("Internal server error"));
+    }
+};
+exports.getLocationByLalAndLong = getLocationByLalAndLong;
+// export const updateEquipementStatus = async (req: Request, res: Response) => {
+//   try {
+//     await equipementServices.updateEquipementStatus(Livepool);
+//     res
+//       .status(200)
+//       .json(new SuccessResponse("update equipement status success"));
+//   } catch (error) {
+//     // Log the error for debugging purposes
+//     logger.equipementLogger.error({ error }, "updateEquipementStatus error");
+//     // Return a 500 internal server error response if something goes wrong
+//     return res.status(500).json(new ErrorResponse("Internal server error"));
+//   }
+// };
 //# sourceMappingURL=equipement.controllers.js.map

@@ -1,1 +1,1 @@
-{"version":3,"file":"racer.interface.js","sourceRoot":"","sources":["../../src/interfaces/racer.interface.ts"],"names":[],"mappings":";;;AAuBA,yCAAyC;AACzC,IAAY,MAOX;AAPD,WAAY,MAAM;IAChB,mCAAoB,CAAA;IACpB,kDAAmC,CAAA;IACnC,wDAAyC,CAAA;IACzC,yCAA0B,CAAA;IAC1B,uCAAwB,CAAA;IACxB,iEAA6C,CAAA;AAC/C,CAAC,EAPW,MAAM,sBAAN,MAAM,QAOjB"}
+{"version":3,"file":"racer.interface.js","sourceRoot":"","sources":["../../src/interfaces/racer.interface.ts"],"names":[],"mappings":""}

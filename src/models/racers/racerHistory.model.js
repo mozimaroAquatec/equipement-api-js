@@ -27,6 +27,14 @@ const RaceHistorySchema = new mongoose_1.default.Schema({
         type: String,
         required: true,
     },
+    firstConnection: {
+        type: String,
+        required: true,
+    },
+    lastUpdatedTime: {
+        type: String,
+        required: true,
+    },
     falseTime: {
         type: String,
         required: true,
@@ -37,6 +45,10 @@ const RaceHistorySchema = new mongoose_1.default.Schema({
         default: false,
         required: true,
     },
+    // system: {
+    //   type: String,
+    //   required: true,
+    // },
     isReconnect: {
         type: Boolean,
         default: false,

@@ -27,7 +27,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
-const RacerInterfaces = __importStar(require("../../interfaces/racer.interface"));
+const EquipementInterfaces = __importStar(require("../../interfaces/equipement.interfaces"));
 // Define the schema for the users collection
 const RacerSchema = new mongoose_1.default.Schema({
     message: { type: String, required: true },
@@ -42,16 +42,23 @@ const RacerSchema = new mongoose_1.default.Schema({
     stillDisconnect: { type: Boolean, required: true },
     connect: { type: Boolean, required: true },
     disconnect: { type: Boolean, required: true },
-    // Todo change values of status in frensh
+    system: { type: String, required: false },
+    firstConnection: {
+        type: String,
+        required: true,
+    },
+    lastUpdatedTime: {
+        type: String,
+        required: true,
+    },
     status: {
         type: String,
         enum: [
-            RacerInterfaces.Status.FirstConnect,
-            RacerInterfaces.Status.Connect,
-            RacerInterfaces.Status.FirstDisconnect,
-            RacerInterfaces.Status.Disconnect,
-            RacerInterfaces.Status.Reconnect,
-            RacerInterfaces.Status.ReturnDisconnect,
+            EquipementInterfaces?.EquipementStatus?.FirstConnect,
+            EquipementInterfaces?.EquipementStatus?.Connect,
+            EquipementInterfaces?.EquipementStatus?.Disconnect,
+            EquipementInterfaces?.EquipementStatus?.Reconnect,
+            EquipementInterfaces?.EquipementStatus?.ReturnDisconnect,
         ],
         required: true,
     },

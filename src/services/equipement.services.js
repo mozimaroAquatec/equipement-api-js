@@ -26,10 +26,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllEquipements = exports.getCountOfNewConnectOfEquipement = exports.getCountOfDisconnectOfEquipement = exports.getCountOfConnectOfEquipement = void 0;
+exports.getEquipementInfoByMacAddress = exports.getEquipementsInfoFirstConnection = exports.getEquipements = exports.getCountOfNewConnectOfEquipement = exports.getCountOfDisconnectOfEquipement = exports.getCountOfConnectOfEquipement = exports.getEquipementByMacAddress = void 0;
 const error_handler_1 = __importDefault(require("../utils/error.handler"));
 const date_1 = __importDefault(require("../utils/date"));
 const logger = __importStar(require("../logging/index"));
+const axios_1 = __importDefault(require("axios"));
+const getEquipementByMacAddress = async (equipementmMdel, // Dynamic model for equipment history
+macAddress) => {
+    try {
+        // Find all documents in the modelHistory where the macAddressField matches the provided macAddress
+        return await equipementmMdel.findOne({ macAddress });
+    }
+    catch (error) {
+        // Log and throw a custom error with model name and details
+        throw new error_handler_1.default(`getEquipementHistory ${equipementmMdel.modelName} services error: ${error}`);
+    }
+};
+exports.getEquipementByMacAddress = getEquipementByMacAddress;
 /**
  *% Get the count of connected equipment for the current day from the provided dynamic model.
  *
@@ -108,23 +121,108 @@ const getCountOfNewConnectOfEquipement = async (equipementModel // Dynamic model
 };
 exports.getCountOfNewConnectOfEquipement = getCountOfNewConnectOfEquipement;
 /**
- *% Get all equipment records from the provided model.
+ *% Retrieves all equipment records from the specified Mongoose model.
  *
- * @param {mongoose.Model<any>} equipementModel - The dynamic mongoose model to fetch records from.
- * @returns {Promise<any[]>} - A promise that resolves to an array of equipment records.
- * @throws {ErrorResponse} - Throws a custom error if the query fails.
+ * This function fetches all documents from the provided Mongoose model and returns them as an array.
+ * If an error occurs during the query, it logs the error with the model name and throws a custom error response.
+ *
+ * @param {mongoose.Model<string>} equipementModel - The Mongoose model to query for equipment records.
+ * @returns {Promise<EquipementInterface.Equipement[]>} - A promise resolving to an array of equipment records.
+ * @throws {ErrorResponse} - Throws a custom error if the query fails, including the model name and error details.
  */
-const getAllEquipements = async (equipementModel // Dynamic model for equipment
+const getEquipements = async (equipementModel // The dynamic Mongoose model for equipment
 ) => {
     try {
-        return await equipementModel.find(); // Fetch all documents from the collection
+        // Fetch all documents from the specified collection
+        return await equipementModel.find();
     }
     catch (error) {
         // Log the error with the model name for better traceability
-        logger.equipementLogger.error({ error }, `getAllEquipements ${equipementModel.modelName} error`);
+        logger.equipementLogger.error({ error }, `getEquipements ${equipementModel.modelName} error`);
         // Throw a custom error response with the model name and error details
-        throw new error_handler_1.default(`getAllEquipements ${equipementModel.modelName} error: ${error}`);
+        throw new error_handler_1.default(`getEquipements ${equipementModel.modelName} error: ${error}`);
     }
 };
-exports.getAllEquipements = getAllEquipements;
+exports.getEquipements = getEquipements;
+const getEquipementsInfoFirstConnection = async () => {
+    try {
+        const equipentsInfo = await axios_1.default.get(`${process.env.TEAM_URL}/Locations/getAllFirstConnection`);
+        return equipentsInfo.data.data;
+    }
+    catch (error) {
+        logger.equipementLogger.error({ error }, "getEquipementsInfo error");
+        throw new error_handler_1.default(`getEquipementsInfo error : ${error}`);
+    }
+};
+exports.getEquipementsInfoFirstConnection = getEquipementsInfoFirstConnection;
+const getEquipementInfoByMacAddress = async (macAddress) => {
+    try {
+        const response = await axios_1.default.get(`${process.env.TEAM_URL}/Locations/sendData/${macAddress}`);
+        if (response?.status === 200) {
+            return response.data.data;
+        }
+        else {
+            return undefined;
+        }
+        // Check the response status and message
+    }
+    catch (error) {
+        if (error.response?.status === 404) {
+            logger.equipementLogger.warn(`MAC Address not found: ${macAddress}`);
+            return undefined;
+        }
+        logger.equipementLogger.error({ error }, "getEquipementsInfo error");
+        throw new error_handler_1.default(`getEquipementInfoByMacAddress error: ${error.message}`);
+    }
+};
+exports.getEquipementInfoByMacAddress = getEquipementInfoByMacAddress;
+// export const updateEquipementStatus = async (
+//   equipementModel: mongoose.Model<any>
+// ) => {
+//   try {
+//     const equipement: EquipementInterface.Equipement[] =
+//       await getAllEquipements(equipementModel);
+//     for (const item of equipement) {
+//       logger.consoleLogger?.info({ item }, "item");
+//       if (item?.status === EquipementInterface.OldStatus.Connect) {
+//         logger.consoleLogger?.info("Connect");
+//         await equipementModel.findByIdAndUpdate(item._id, {
+//           status: EquipementInterface.Status.Connect,
+//         });
+//       } else if (item?.status === EquipementInterface.OldStatus.Reconnect) {
+//         logger.consoleLogger?.info("Reconnect");
+//         await equipementModel.findByIdAndUpdate(item._id, {
+//           status: EquipementInterface.Status.Reconnect,
+//         });
+//       } else if (item?.status === EquipementInterface.OldStatus.FirstConnect) {
+//         logger.consoleLogger?.info("FirstConnect");
+//         await equipementModel.findByIdAndUpdate(item._id, {
+//           status: EquipementInterface.Status.FirstConnect,
+//         });
+//       } else if (
+//         item?.status === EquipementInterface.OldStatus.FirstDisconnect
+//       ) {
+//         logger.consoleLogger?.info("FirstDisconnect");
+//         await equipementModel.findByIdAndUpdate(item._id, {
+//           status: EquipementInterface.Status.ReturnDisconnect,
+//         });
+//       } else if (
+//         item?.status === EquipementInterface.OldStatus.ReturnDisconnect
+//       ) {
+//         logger.consoleLogger?.info("ReturnDisconnect");
+//         await equipementModel.findByIdAndUpdate(item._id, {
+//           status: EquipementInterface.Status.ReturnDisconnect,
+//         });
+//       } else if (item?.status === EquipementInterface.OldStatus.Disconnect) {
+//         logger.consoleLogger?.info("Disconnect");
+//         await equipementModel.findByIdAndUpdate(item._id, {
+//           status: EquipementInterface.Status.Disconnect,
+//         });
+//       }
+//     }
+//   } catch (error) {
+//     logger.equipementLogger.error({ error }, `updateEquipementStatus error`);
+//     throw new ErrorResponse(`updateEquipementStatus error ${error}`);
+//   }
+// };
 //# sourceMappingURL=equipement.services.js.map

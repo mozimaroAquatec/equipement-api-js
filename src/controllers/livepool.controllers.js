@@ -49,7 +49,8 @@ const getLivepools = async (req, res) => {
     try {
         // Extract and clean query parameters
         const searchMacAddress = req.query.searchMacAddress?.replace(/\s/g, "") || "";
-        const status = req.query.status || EquipementInterfaces.EquipmentStatus.AllConnect;
+        const status = req.query.status ||
+            EquipementInterfaces.EquipementStatusParams.AllConnect;
         const pumpMode = req.query.pumpMode;
         // Fetch the list of livepools using the service function
         const livepools = await livepoolServices.getLivepools(searchMacAddress, status, pumpMode);

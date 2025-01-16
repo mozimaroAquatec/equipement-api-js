@@ -31,9 +31,8 @@ const livepool_model_1 = __importDefault(require("../models/livepools/livepool.m
 const date_1 = __importDefault(require("../utils/date"));
 const error_handler_1 = __importDefault(require("../utils/error.handler"));
 const logger = __importStar(require("../logging/index"));
-const LivepoolInterfaces = __importStar(require("../interfaces/livepool.interface"));
-const CommonInterfaces = __importStar(require("../interfaces/common.interface"));
 const livepoolHelpers = __importStar(require("../helpers/livepool.helpers"));
+const EquipementInterfaces = __importStar(require("../interfaces/equipement.interfaces"));
 /**
  *% Get Livepool documents that match the provided MAC address and status.
  *
@@ -48,7 +47,7 @@ const getLivepools = async (searchMacAddress, status, pumpMode) => {
         // Initialize an empty array to hold the result
         let livepools = [];
         // Perform the search based on the provided status
-        if (status === CommonInterfaces.EquipmentStatus.AllConnect) {
+        if (status === EquipementInterfaces.EquipementStatusParams.AllConnect) {
             // Find all Livepool documents with today's date that match the provided MAC address
             //% Added $options: 'i' to the regex to make the search case-insensitive
             livepools = (await livepool_model_1.default.find({
@@ -62,15 +61,15 @@ const getLivepools = async (searchMacAddress, status, pumpMode) => {
                 .populate("location"));
             livepools = livepoolHelpers.filterLivepoolByPumpModes(livepools, pumpMode);
         }
-        else if (status === CommonInterfaces.EquipmentStatus.NewConnect) {
+        else if (status === EquipementInterfaces.EquipementStatusParams.NewConnect) {
             // Find new connections (first connect or reconnect) with today's date that match the provided MAC address
             livepools = (await livepool_model_1.default.find({
                 $and: [
                     { macAddress: { $regex: searchMacAddress, $options: "i" } },
                     {
                         $or: [
-                            { status: LivepoolInterfaces.Status.FirstConnect },
-                            { status: LivepoolInterfaces.Status.Reconnect },
+                            { status: EquipementInterfaces.EquipementStatus.FirstConnect },
+                            { status: EquipementInterfaces.EquipementStatus.Reconnect },
                         ],
                     },
                     { date: (0, date_1.default)().today },
@@ -81,7 +80,7 @@ const getLivepools = async (searchMacAddress, status, pumpMode) => {
                 .populate("location"));
             livepools = livepoolHelpers.filterLivepoolByPumpModes(livepools, pumpMode);
         }
-        else if (status === CommonInterfaces.EquipmentStatus.AllDisconnect) {
+        else if (status === EquipementInterfaces.EquipementStatusParams.AllDisconnect) {
             // Find all Livepool documents with dates other than today that match the provided MAC address
             livepools = (await livepool_model_1.default.find({
                 $and: [
@@ -93,7 +92,7 @@ const getLivepools = async (searchMacAddress, status, pumpMode) => {
                 .populate("lamp")
                 .populate("location"));
         }
-        else if (status === CommonInterfaces.EquipmentStatus.NewDisconnect) {
+        else if (status === EquipementInterfaces.EquipementStatusParams.NewDisconnect) {
             // Find new disconnections (first disconnect or returned disconnect) with yesterday's date that match the provided MAC address
             livepools = (await livepool_model_1.default.find({
                 $and: [

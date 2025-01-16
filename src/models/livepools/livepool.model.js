@@ -27,7 +27,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
-const LivepoolInterfaces = __importStar(require("../../interfaces/livepool.interface"));
+const EquipementInterfaces = __importStar(require("../../interfaces/equipement.interfaces"));
 // Define the schema for the Livepool collection
 const LivepoolSchema = new mongoose_1.default.Schema({
     message: { type: String, required: true },
@@ -42,15 +42,22 @@ const LivepoolSchema = new mongoose_1.default.Schema({
     stillDisconnect: { type: Boolean, required: true },
     connect: { type: Boolean, required: true },
     disconnect: { type: Boolean, required: true },
+    firstConnection: {
+        type: String,
+        required: true,
+    },
+    lastUpdatedTime: {
+        type: String,
+        required: true,
+    },
     status: {
         type: String,
         enum: [
-            LivepoolInterfaces.Status.FirstConnect,
-            LivepoolInterfaces.Status.Connect,
-            LivepoolInterfaces.Status.FirstDisconnect,
-            LivepoolInterfaces.Status.Disconnect,
-            LivepoolInterfaces.Status.Reconnect,
-            LivepoolInterfaces.Status.ReturnDisconnect,
+            EquipementInterfaces.EquipementStatus.FirstConnect,
+            EquipementInterfaces.EquipementStatus.Connect,
+            EquipementInterfaces.EquipementStatus.Disconnect,
+            EquipementInterfaces.EquipementStatus.Reconnect,
+            EquipementInterfaces.EquipementStatus.ReturnDisconnect,
         ],
         required: true,
     },

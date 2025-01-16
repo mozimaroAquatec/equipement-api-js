@@ -31,8 +31,13 @@ const equipementControllers = __importStar(require("../controllers/equipement.co
 // Express EquipementRoutes for equipement routes
 const EquipementRoutes = express_1.default.Router();
 // Route: GET / - Get all racers data
+EquipementRoutes.get("/", equipementControllers.getEquipementByMacAddress);
 EquipementRoutes.get("/history", equipementControllers.getEquipementHistory);
 EquipementRoutes.get("/location", equipementControllers.getEquipementLocation);
+EquipementRoutes.get("/info", equipementControllers.getEquipementInfoByMacAddress);
+EquipementRoutes.get("/location/lat-long", equipementControllers.getLocationByLalAndLong);
+EquipementRoutes.get("/info/list", equipementControllers.getEquipementsInfo);
+// EquipementRoutes.put("/status", equipementControllers.updateEquipementStatus);
 EquipementRoutes.post("/location", equipementControllers.createEquipementsLocation);
 exports.default = EquipementRoutes;
 //# sourceMappingURL=equipement.routes.js.map

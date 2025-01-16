@@ -36,6 +36,7 @@ RacerRoutes.get("/info", racerControllers.getRacerInfo);
 RacerRoutes.get("/pumps/info", racerControllers.getInfoOfPumpsOfRacer);
 RacerRoutes.get("/lamps/info", racerControllers.getInfoOfLampsOfRacer);
 RacerRoutes.get("/duplicates", racerControllers.getDuplicatesRacer);
+RacerRoutes.put("/", racerControllers.updateRacer);
 RacerRoutes.delete("/duplicates", racerControllers.removeDuplicatesOfRacer);
 exports.default = RacerRoutes;
 //# sourceMappingURL=racer.routes.js.map
